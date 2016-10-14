@@ -25,6 +25,7 @@ if [ -z "$INSTANCE" ]; then
 fi
 
 # TODO need bash run fucntion wrapper for date + logging
+# TODO needs bash run function for email as well
 DATE=$(date +%s)
 
 echo "$DATE: starting instance state check for $INSTANCE"
@@ -38,7 +39,6 @@ function check_instance_state () {
 
 function validate_instance_state () {
     instance=$1
-    instance_state=$2
     DATE=$(date +%s)
     INSTANCE_STATE=$(check_instance_state $INSTANCE)
     echo "$DATE: $INSTANCE instance stace is $INSTANCE_STATE"
@@ -54,15 +54,18 @@ function validate_instance_state () {
         INSTANCE_STATE_2=$(check_instance_state $INSTANCE)
         if [ "$INSTANCE_STATE_2" != "ACTIVE" ]; then
             DATE=$(date +%s)
-            echo "$DATE: instance found in a non ACTIVE \
-                state for a second time"
+            echo "$DATE: instance found in a non ACTIVE" \
+                "state for a second time"
             echo "$DATE: issuing start command on $INSTANCE"
             instance_start $INSTANCE 
+            DATE=$(date +%s)
+            echo "$DATE: instance stared succesfully, "\
+                "exit 1 due to error"
+            exit 1
         fi
     fi
 }
 
-INSTANCE_STATE=$(check_instance_state $INSTANCE)
 function instance_start () {
     DATE=$(date +%s)
     instance=$1
@@ -73,26 +76,13 @@ function instance_start () {
     fi
 }
 
-INSTANCE_STATE=$(check_instance_state $INSTANCE)
-
-echo "$DATE: $INSTANCE instance stace is $INSTANCE_STATE"
-
-# TODO the number of rechecks and sleeps should be configured by args
-
-if [ "$INSTANCE_STATE" != "ACTIVE" ]; then
-    DATE=$(date +%s)
-    echo "$DATE: $INSTANCE_STATE"
-    echo "$DATE: $INSTANCE was found in a not ACTIVE state, rechecking"
-    sleep 2
-    INSTANCE_STATE_2=$(check_instance_state $INSTANCE)
-    if [ "$INSTANCE_STATE_2" != "ACTIVE" ]; then
-        DATE=$(date +%s)
-        echo "$DATE: instance found in a non ACTIVE state for a second time"
-        echo "$DATE: issuing start command on $INSTANCE"
-        instance_start $INSTANCE 
-    fi
+if [ -z $LOOP ]; then
+    validate_instance_state $INSTANCE
+else
+        while sleep 5; do
+            validate_instance_state $INSTANCE;
+        done
 fi
-
 
 DATE=$(date +%s)
 echo "$DATE: work done, exiting 0"
