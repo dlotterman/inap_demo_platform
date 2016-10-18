@@ -6,6 +6,8 @@
 
 # requires system packaged nova / openstack client tools
 
+# This is a POC script and is not production ready
+
 USAGE="RTFM"
 
 while [ "$1" != "" ]; do
