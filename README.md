@@ -1,5 +1,6 @@
-# inap_demo_platform
+## inap_demo_platform
 
+Collection of tools and configurations for INAP's Agile Cloud platform.
 
-Unliscensed or WTFPL Licensed + No Warranty Disclaimer
+Unlicensed or WTFPL Licensed + No Warranty Disclaimer
 https://en.wikipedia.org/wiki/WTFPL
