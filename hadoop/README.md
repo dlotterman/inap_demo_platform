@@ -1,6 +1,6 @@
 ## INAP Agile with Apache Hadoop
 
-This directory contains a number of example configs for deploying Apache Hadoop on top of the Agile cloud platform.
+This directory contains a number of example configs for deploying Apache Hadoop on top of the [Agile] (http://www.internap.com/cloud/public-cloud/) cloud platform.
 
 --- 
 
