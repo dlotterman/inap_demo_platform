@@ -1,6 +1,6 @@
 # Apache MapReduce with Agile Swift 
 
-The `swift_core_site.xml` file contains an example configuration for a hadoop environment to view a Agile Swift container as a HDFS data source, allowing both `hdfs  dfs` file operations as well as `mapred job` functions.
+The `swift_core_site.xml` file contains an example configuration for a hadoop environment to view a Agile Swift container as a HDFS data source, allowing both `hdfs  dfs` file operations as well as `mapred job` and `hive` functionality.
 
 ### Requirements
 
@@ -65,11 +65,22 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 ```
 > Configures the password parameter. For Agile, use this is the password associated with the `agile.username` user used while authenticating through the horizon portal. Not to be confused with other documentation that states "API token", this must be the user password for the account. Should there be restrictions on plaintext passwords in on disk files, this can be set by environment variable or by `hdfs dfs` or `mapred job` configuration flags. Please see the Hadoop Openstack documentation below.
 
+### Intended Dataflows
+
+While it is possible to load and manipulate data via the `hdfs dfs` command set, performance (particularly over filesets with large number of files) is likely to be sub-optimal.
+
+It is recommended that data is loaded the traditional `swift` or `openstack` toolsets, and then MRv1 jobs target the Agile Swift container. For best performance, the mapreduce tasktrackers should be provisioned so that the entirety of the working dataset for a job can be cached in local memory or disk cache to minimize round trips between the active MRv1 cluster and the Swift Object Store. 
+
+Swift is also a valid source or destination for `hadoop distcp` operations, allowing it to support a range of ETL and operational / migration data flows.
+
 ### Documentation
 * [Hadoop Openstack](https://hadoop.apache.org/docs/stable2/hadoop-openstack/index.html) integration documentation page
-* 
+* [Spark Openstack](https://spark.apache.org/docs/latest/storage-openstack-swift.html) integration documentation page
+* [Hadoop disct](https://hadoop.apache.org/docs/r1.2.1/distcp2.html) documentation
+* [Kafka to Openstack](https://github.com/pinterest/secor) 
+* [Python Swift Client Library](https://github.com/openstack/python-swiftclient)
 
 
 ### Caveats
 
-* MRv2 / YARN is unable to address swift:// namespaces for submitted distributed jobs. This is because the `hadoop-openstack` swift implementation does not return valid user / group strings to directory / file listings (it returns empty strings). When submitting a job to YARN, it performs a safety check on permissions which does not currently support empty user / group strings. `s3n` solves for this by a configuration available to return a default user / name.
+* MRv2 / YARN is unable to address swift:// namespaces for submitted distributed jobs. This is because the `hadoop-openstack` swift implementation does not return valid user / group strings to directory / file listings (it returns empty strings). When submitting a job to YARN, it performs a safety check on permissions which does not currently support empty user / group strings. `s3n` solves for this by a configuration available to return a default user / name. MRv1 and Apache Spark should behave as expected
