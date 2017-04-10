@@ -1,0 +1,6 @@
+inap_a1_1:
+  - web01
+  - web02
+
+inap_a1_8:
+   - db1

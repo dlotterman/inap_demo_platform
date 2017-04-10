@@ -43,7 +43,7 @@ function validate_instance_state () {
     instance=$1
     DATE=$(date +%s)
     INSTANCE_STATE=$(check_instance_state $INSTANCE)
-    echo "$DATE: $INSTANCE instance stace is $INSTANCE_STATE"
+    echo "$DATE: $INSTANCE instance state is $INSTANCE_STATE"
 
     if [ "$INSTANCE_STATE" != "ACTIVE" ]; then
         DATE=$(date +%s)
@@ -62,7 +62,7 @@ function validate_instance_state () {
             instance_start $INSTANCE 
             DATE=$(date +%s)
             echo "$DATE: instance stared succesfully, "\
-                "exit 1 due to error"
+                "exit 1 due to instance state change"
             exit 1
         fi
     fi
