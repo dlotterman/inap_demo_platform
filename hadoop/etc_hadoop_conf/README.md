@@ -5,7 +5,7 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 ## Agile specific configuration paramters
 
 ### Default FS
-> ```<property>
+```<property>
     <name>fs.defaultFS</name>
     <value>swift://hadoopcontainer.agile/</value>
   </property>
@@ -13,7 +13,7 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 > Configures the default HDFS namespace to be the configured Swift Container, allows for default `hdfs dfs -ls /` type behavior
 
 ### Auth URL
-> ``` <property>
+``` <property>
       <name>fs.swift.service.agile.auth.url</name>
       <value>https://identity.api.cloud.iweb.com/v2.0/tokens</value>
       <description>Agile NYJ</description>
@@ -22,7 +22,7 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 > Configures the OpenStack authentication endpoint. Currently requires the V2 endpoint.
 
 ### Agile Tenant
-> ``` <property>
+``` <property>
       <name>fs.swift.service.agile.tenant</name>
       <value>inap-$PROJECT_STRING</value>
     </property>
@@ -31,7 +31,7 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 
 
 ### Agile Username
-> ```<property>
+```<property>
       <name>fs.swift.service.agile.username</name>
       <value>api-$API_NUM_STRING</value>
     </property>
@@ -39,7 +39,7 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 > Configures the Opestack username paramter, should be the `api-` username string used to authenticate with the Horizon portal as well as visible in the [Top Right](https://horizon.internap.com/project/) corner of the Horizon portal once authenticated.
 
 ### Agile Region
-> ```    <property>
+```    <property>
       <name>fs.swift.service.agile.region</name>
       <value>nyj01</value>
     </property>
@@ -47,7 +47,7 @@ The `swift_core_site.xml` file contains an example configuration for a hadoop en
 > Configures the Agile region for Swift and other resources
 
 ### Agile Password
-> ```    <property>
+```    <property>
       <name>fs.swift.service.agile.password</name>
       <value>$AGILE_API_PASS_STRING</value>
     </property>
