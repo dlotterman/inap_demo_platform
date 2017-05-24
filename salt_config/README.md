@@ -3,16 +3,23 @@
 It is currently able to fully support the follow operational cases:
 
 + ![Progress](http://progressed.io/bar/100)   [OpenStack as a Cloud Provider](/salt_config/etc_salt/cloud.providers.d) - A sample Cloud Provider configuration using INAP's Agile as an example
++ ![Progress](http://progressed.io/bar/100)   [OpenStack as a Cloud Instance Profile](/salt_config/etc_salt/cloud.profiles.d) - A sample Instance Profile configuration using INAP's Agile as an example
++ ![Progress](http://progressed.io/bar/80)  [dnsmasq with auto PRT](/salt_config/srv_salt/dnsmasq) - A sample dnsmasq formula that provides for automagic resolution of reverse DNS to a domain record based on PTR.
+
+### What does it do?
+
+The supplied configs leverage Salt-Stacks implementation of [Apache Libcloud](https://libcloud.apache.org/) to provision and manage resources ontop of a OpenStack certified public cloud.
+- Manage cloud resources in a composeable fashion
+- Follow Salt-Stack best practices and guidelines
+- Build Salt formulas to automate operational and application delivery tasks
 
 
+### What is INAP Agile
+A [OpenStack Certified Public Cloud](https://www.openstack.org/marketplace/public-clouds/) that implements best of breed networking and builds on core OpenStack functionality such as [Ironic](https://wiki.openstack.org/wiki/Ironic) to provision and manage [Bare Metal Chassis](http://www.internap.com/cloud/) as cloud resources.
 
-Incuded is a skeleton config for congirufing Saltstack to work with [Agile](http://www.internap.com/cloud/public-cloud/) as Salt Cloud Provider.
 
-### About
-Agile is built using an OpenStack implementation that adheres very closely to the intended specifications and hence will likely be able to support any OpenStack feature functionality provided by [Apache Libcloud](https://libcloud.apache.org/), which is part of the [SaltStack Libcloud](https://docs.saltstack.com/en/latest/topics/cloud/install/index.html) project.
-
+### Documentation
 When in doubt please see SaltStack's documentation for [OpenStack and Salt](https://github.com/openstack/openstack-salt)
-
 
 Follows configuration syntax for Salt `2016.3.1` 
 
