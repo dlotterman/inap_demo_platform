@@ -10,7 +10,7 @@ This platform would be operationally stateless while being able to meet the elas
 * Data Persistence - Agile Swift
 * MapReduce (MRv1) Task Tracker - Agile Instance
     * A dedicated instance running the MRv1 Task Tracker
-    * Leverages snapshots for RTO / RPO of the 
+    * Leverages snapshots for RTO / RPO of the environment
     * Dedicated IP address [reserved through Neutron](http://kb.internap.com/bare-metal/adding-additional-ips-to-a-vm/)
 * MapReduce (MRv1) worker instances
     * Provisioned and managed by Openstack HEAT
