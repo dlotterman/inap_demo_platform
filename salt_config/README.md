@@ -2,7 +2,7 @@
 
 It is currently able to fully support the follow operational cases:
 
-+ ![Progress](http://progressed.io/bar/100)   [OpenStack as a Cloud Provider](salt_config/etc_salt/cloud.providers.d) - A sample Cloud Provider configuration using INAP Agile as an example
++ ![Progress](http://progressed.io/bar/100)   [OpenStack as a Cloud Provider](/salt_config/etc_salt/cloud.providers.d) - A sample Cloud Provider configuration using INAP's Agile as an example
 
 
 
