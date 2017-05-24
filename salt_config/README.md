@@ -24,12 +24,12 @@ The supplied configs leverage Salt-Stacks implementation of [Apache Libcloud](ht
    git clone https://github.com/dlotterman/inap_demo_platform/
   ```
 3. Copy the directories in the repo to the `etc` and `src` files configured (by default `/etc/salt/` and `/srv/salt`.
-..* `rsync -a salt_config/etc_salt/ /etc/salt/`
-..* `rsync -a salt_config/srv_salt/ /srv/salt/`
+  * `rsync -a salt_config/etc_salt/ /etc/salt/`
+  * `rsync -a salt_config/srv_salt/ /srv/salt/`
 4. Update `*.cfg` files according to documentation provided in the config READMEs. 
-..* `/etc/salt/cloud.providers.d/agile.conf`
-..* `/etc/salt/cloud.profiles.d/*.conf`
-..* `/etc/salt/cloud.mapfile`
+  * `/etc/salt/cloud.providers.d/agile.conf`
+  * `/etc/salt/cloud.profiles.d/*.conf`
+  * `/etc/salt/cloud.mapfile`
 5. You can now launch instances according to the mapfile:
 ```sudo salt-cloud -m /etc/salt/cloud.mapfile```
 6. You can now interact with instances according to Salt-Stack best practices
