@@ -1,0 +1,32 @@
+version: 0.1
+log:
+  fields:
+    service: registry
+  level: info
+storage:
+  cache:
+    blobdescriptor: inmemory
+  swift:
+    username: api-NUMSTRING
+    password: LONG_API_KEY_HERE
+    authurl: https://identity.api.cloud.iweb.com/v2.0
+    tenant: inap-XXXXX
+    # tenantid: f8f93377f8cf4255b6766740082f88ad
+    region: $REGION
+    container: docker_registry_demo
+    rootdirectory: /
+http:
+  addr: :5000
+  headers:
+    X-Content-Type-Options: [nosniff]
+  tls:
+    certificate: /root/certs/dockerregistry/cert.pem
+    key: /root/certs/dockerregistry/privkey.pem
+    # clientcas:
+    #  - /etc/letsencrypt/live/dockerregistry.dlott.casa/chain.pem
+health:
+  storagedriver:
+    enabled: true
+    interval: 60s
+    threshold: 3
+

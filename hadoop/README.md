@@ -1,4 +1,8 @@
-## INAP Agile with Apache Hadoop
+### A collection of configurations and files for Hadoop environments leveraging OpenStack certified public clouds.
+
+It currently documents the following configurations:
+
+i+ ![Progress](http://progressed.io/bar/100)   [docker](/roles/docker) - A basic docker installation
 
 This directory contains a number of example configs for deploying Apache Hadoop on top of the [Agile](http://www.internap.com/cloud/public-cloud/) cloud platform.
 

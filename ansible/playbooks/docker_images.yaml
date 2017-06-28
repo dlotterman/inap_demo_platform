@@ -1,0 +1,18 @@
+- name: Populate SWIFT docker registry
+  hosts: all
+  remote_user: root
+  gather_facts: False
+  tasks:
+    - name: load_nginx_image
+      docker_image:
+        name: nginx:latest
+        repository: dockerregistry.dlott.casa:5000/nginx
+        tag: nginx
+        push: yes
+
+    - name: load_hello_world_image
+      docker_image:
+        name: hello-world:latest
+        repository: dockerregistry.dlott.casa:5000/hello_world
+        tag: hello-world
+        push: yes

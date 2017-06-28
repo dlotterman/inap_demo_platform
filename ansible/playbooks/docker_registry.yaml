@@ -1,0 +1,21 @@
+- name: Launch Docker Registry Supported by SWIFT
+  hosts: all
+  remote_user: root
+  gather_facts: True
+  tasks:
+    - name: docker_swift_registry
+      docker_container:
+        name: "docker_registry"
+        image: "registry:2"
+        state: started
+        recreate: no
+        exposed_ports: 5000
+        published_ports: 5000:5000
+        keep_volumes: no
+        hostname: dockerregistry.dlott.casa
+        restart_policy: unless-stopped
+        volumes:
+          - /etc/docker/registry/config.yml:/etc/docker/registry/config.yml
+          - /root/certs/dockerregistry/cert.pem:/root/certs/dockerregistry/cert.pem
+          - /root/certs/dockerregistry/privkey.pem:/root/certs/dockerregistry/privkey.pem
+

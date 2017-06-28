@@ -1,0 +1,27 @@
+- name: Launch Docker apps
+  hosts: all
+  remote_user: root
+  gather_facts: False
+  tasks:
+    - name: docker_nginx
+      docker_container:
+        name: "docker_nginx"
+        image: "dockerregistry.dlott.casa:5000/nginx"
+        state: started
+        recreate: no
+        exposed_ports: 80
+        published_ports: 80:80
+        keep_volumes: no
+        hostname: nginx.dlott.casa
+        restart_policy: unless-stopped
+
+    - name: docker_hello_world
+      docker_container:
+        name: "docker_hello_world"
+        image: "dockerregistry.dlott.casa:5000/hello_world"
+        state: started
+        recreate: no
+        keep_volumes: no
+        hostname: helloworld.dlott.casa
+        restart_policy: False
+
