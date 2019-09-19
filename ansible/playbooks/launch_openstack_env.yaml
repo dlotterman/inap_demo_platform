@@ -5,26 +5,26 @@
     - name: Deploy docker host
       os_server:
         state: present
-        name: dockerhost.dlott.casa
-        image: 8c3788ac-458f-4ee2-857e-4cfd4f0e3f97
-        key_name: dlotterman_orchestra
-        wait: no
+        name: SANITIZED
+        image: SANIZIED
+        key_name: SANITIZED
+        wait: yes
         flavor: A1.4
         # auto_floating_ip: no
         nics:
           # port-id requires up to date shade package as of 06-2017
           # requires neutron port to be created: http://bit.ly/2seqyV4
-          - port-id: 0dab595e-8c46-4abd-899c-5c2d0737b5c8
-          - net-name: inap-18454-LAN3498
+          - port-id: 0dab595e-8c46-LONGSTRING
+          - net-name: inap-NETWORKNAME
         security_groups:
           - default
           - global_egress
           - webserver_allowed
         meta:
-          hostname: dockerhost.dlott.casa
+          hostname: SANITIZED
 
     - name : Deploy SWIFT Object Store Container
       os_object:
-        container: docker_registry_demo
+        container: SANITIZED`
         state: present
         wait: no

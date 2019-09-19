@@ -1,0 +1,26 @@
+- name: deploying hosts
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: aero1
+      os_server:
+        state: present
+        name: aero1
+        image: SANITZED
+        key_name: SANITIZED
+        wait: yes
+        flavor: A1.2
+        nics:
+          - net-name: inap-SANITIZED
+          - net-name: inap-SANITZED
+        security_groups:
+          - default
+          - global_egress
+        meta:
+          hostname: aero1
+
+    - name : Deploy SWIFT Object Store Container
+      os_object:
+        container: SANITIZED
+        state: present
+        wait: no
