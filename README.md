@@ -15,7 +15,6 @@ A collection of tools and configurations for INAP's Bare Metal Cloud (BMC) power
 
 ## License and Support
 
-Any software, configuration or documentation in this repository is community con
-tributed and is not associated or support any any organization.
+Any software, configuration detail or documentation in this repository is community contributed and is not associated or supported by any organization or individual.
 
 See the [LICENSE](LICENSE.md) file for license rights and limitations (Unlicense).
