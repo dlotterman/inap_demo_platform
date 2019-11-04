@@ -1,0 +1,14 @@
+# Useful for breaking into CoreOS images
+# As long as you can get a "console", you can break in via
+# creating a user here in the wheel / sudo group
+
+passwd:
+    users:
+    - name: USERNAME
+      groups:
+      - sudo
+      - wheel
+      # ct-v0.9 CT->JSON tool will barf on this key
+      # Ignition on CoreOS 2247.5 honors it in the JSON file
+      # Note the $6$ stuff is standard Linux hash padding
+      passwordHash: "$6$MINNESOTAHASTHEBESTPIZZA_HASH" 

@@ -1,0 +1,15 @@
+systemd:
+  units:
+    - name: bmc_metadata.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Metadata population for INAP BMC
+        Before=network-pre.target
+        Wants=network-pre.target
+        After=local-fs.target
+        [Service]
+        Type=oneshot 
+        ExecStart=/usr/bin/bash -c "/var/lib/bmc/bmc_coreos.sh"
+        [Install]
+        WantedBy=multi-user.target

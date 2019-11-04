@@ -1,0 +1,8 @@
+systemd:
+  units:
+    - name: systemd-networkd.service
+      dropins:
+        - name: 10-debug.conf
+          contents: |
+            [Service]
+            Environment=SYSTEMD_LOG_LEVEL=debug
