@@ -4,7 +4,7 @@ A collection of tools and configurations for INAP's Bare Metal Cloud (BMC) power
 
 [INAP Cloud](https://www.inap.com/cloud/)
 
-**Useful resources**
+**Useful external resources**
 * [INAP's Public Github](https://github.com/internap)
 * [LibCloud Documentation](https://libcloud.readthedocs.io/en/latest/compute/drivers/openstack.html)
 * [Redhat's OpenRC Documentation](https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/End_User_Guide/cli_openrc.html)
