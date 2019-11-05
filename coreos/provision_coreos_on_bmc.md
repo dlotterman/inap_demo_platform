@@ -2,7 +2,9 @@
 
 **Last Updated November 2019**
 
-Consult the [CoreOS OpenStack documentation] (https://coreos.com/os/docs/latest/booting-on-openstack.html) for the most recent CoreOS image build for the relevant channel. Note that this is only for identifying the correct image to download. As of 11/2019, the documentation on that page was out of date with CoreOS's current state of `Ignition` vs `cloud-init` adoption.
+Consult the [CoreOS OpenStack documentation](https://coreos.com/os/docs/latest/booting-on-openstack.html) for the most recent CoreOS image build for the relevant channel. 
+Note that this is only for identifying the correct image to download. 
+As of 11/2019, the documentation on that page was out of date with CoreOS's current state of `Ignition` vs `cloud-init` adoption.
 
 #### Download the most current "stable" image:
 ```
@@ -115,7 +117,7 @@ $ openstack flavor list
 *Please note:* at this time, this documentation and tooling is likely broken for Bare Metal instances.
 
 
-####Bootstrapping 
+#### Bootstrapping 
 
 BMC bootstraps newly provisioned isntances through a pairing of OpenStack's "ConfigDrive" and [cloud-init](https://cloudinit.readthedocs.io/en/latest/). BMC **explicitly** does not support the OpenStack HTTP meta-data endpoint for security and operations reasons.
 
@@ -128,7 +130,7 @@ More documentation on Ignition can be found [here](https://coreos.com/ignition/d
 * [Ignition Configuration Transpiler](https://coreos.com/os/docs/latest/overview-of-ct.html)
 * [Ignition Configuration Validator](https://coreos.com/validate/)
 
-The [json](ignition/json/) files included this repo contain all the information required to sideload the needed configuration into the CoreOS instance at provision time. The key stanza is the (absurd to humans looking) [storage](https://github.com/dlotterman/inap_demo_platform/blob/16a664aa27a57af684adc9177bfee66d561fe39c/coreos/ignition/json/bmc_ignition.json#L23P stanza which writes a [simple bash](scripts/) script to `/var/lib/bmc/` which is then constructed into a `systemd` service to be managed by `systemd` in order to populate the isntance with the needed data from the "ConfigDrive". Examples of how to construct that script into the json file can be found in the Ignition configuration [examples](ignition/ct/) included in the repo.
+The [json](ignition/json/) files included this repo contain all the information required to sideload the needed configuration into the CoreOS instance at provision time. The key stanza is the (absurd to humans looking) [storage](https://github.com/dlotterman/inap_demo_platform/blob/16a664aa27a57af684adc9177bfee66d561fe39c/coreos/ignition/json/bmc_ignition.json#L23P) stanza which writes a [simple bash](scripts/) script to `/var/lib/bmc/` which is then constructed into a `systemd` service to be managed by `systemd` in order to populate the isntance with the needed data from the "ConfigDrive". Examples of how to construct that script into the json file can be found in the Ignition configuration [examples](ignition/ct/) included in the repo.
 
 At this time due to limitations in the Ignition transpiler and YAML tooling, it is strongly recommend to provide the JSON file as the userdata file rather than a Ignition `ct` YAML file, despite that generally not being best practice with other `tool` -> `json` workflows.
 
