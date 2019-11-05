@@ -29,7 +29,7 @@
         "systemd": {
             "units": [{
                 "dropins": [{
-                    "contents": "[Unit]\nRequires=bmc_metadata.service\nAfter=bmc_metadata.service\n\n[Service]\nEnvironmentFile=/run/metadata/bmc\nExecStart=\nExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \\\n  --listen-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --listen-client-urls=\"http://0.0.0.0:2379\" \\\n  --initial-advertise-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --advertise-client-urls=\"http://${BMC_network1_IP}:2379\" \\\n  --discovery=\"https://discovery.etcd.io/$UPDATEMEWITHREALTOKEN\"",
+                    "contents": "[Unit]\nAfter=systemd-networkd.service\n\n[Service]\nEnvironmentFile=/run/metadata/bmc\nExecStart=\nExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \\\n  --listen-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --listen-client-urls=\"http://0.0.0.0:2379\" \\\n  --initial-advertise-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --advertise-client-urls=\"http://${BMC_network1_IP}:2379\" \\\n  --discovery=\"https://discovery.etcd.io/$UPDATEMEWITHREALTOKEN\"",
                     "name": "20-clct-etcd-member.conf"
                 }],
                 "enabled": true,

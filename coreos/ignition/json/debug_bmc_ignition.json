@@ -16,7 +16,7 @@
                     "sshAuthorizedKeys": [
                         "ssh-rsa veryLongRSAPublicKey"
                     ]
-                },
+                }
             ]
         },
         "storage": {
@@ -40,10 +40,10 @@
         "systemd": {
             "units": [{
                 "dropins": [{
-                    "contents": "[Unit]\nRequires=bmc_metadata.service\nAfter=bmc_metadata.service\n\n[Service]\nEnvironmentFile=/run/metadata/bmc\nExecStart=\nExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \\\n  --listen-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --listen-client-urls=\"http://0.0.0.0:2379\" \\\n  --initial-advertise-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --advertise-client-urls=\"http://${BMC_network1_IP}:2379\" \\\n  --discovery=\"https://discovery.etcd.io/\u003ctoken\u003e\"",
+                    "contents": "[Unit]\nAfter=systemd-networkd.service\n\n[Service]\nEnvironmentFile=/run/metadata/bmc\nExecStart=\nExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \\\n  --listen-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --listen-client-urls=\"http://0.0.0.0:2379\" \\\n  --initial-advertise-peer-urls=\"http://${BMC_network1_IP}:2380\" \\\n  --advertise-client-urls=\"http://${BMC_network1_IP}:2379\" \\\n  --discovery=\"https://discovery.etcd.io/\u003ctoken\u003e\"",
                     "name": "20-clct-etcd-member.conf"
                 }],
-                "enable": true,
+                "enabled": true,
                 "name": "etcd-member.service"
             }, {
                 "contents": "[Unit]\nDescription=Metadata population for INAP BMC\nBefore=network-pre.target\n[Service]\nType=oneshot\nExecStart=/usr/bin/bash -c \"/var/lib/bmc/bmc_coreos.sh\"\n[Install]\nRequiredBy=systemd-networkd.service\n",
