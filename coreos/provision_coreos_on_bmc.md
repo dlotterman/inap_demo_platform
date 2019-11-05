@@ -125,12 +125,14 @@ Ignition, CoreOS's new provisioning engine, does not currently support gathering
 
 Ignition is however able to detect the presence of the "ConfigDrive" when it begins its provisioning engine, just not to completion of provisioning the instance. This step leverages Ignitions Configuration Template and JSON configuration mechanisms to sideload the required information into the instance in order for it to complete its provisioning tasks and deliver a functioning CoreOS instance.
 
-More documentation on Ignition can be found [here](https://coreos.com/ignition/docs/latest/). Please not that as of 11/2019, the documentation between Ignition, CoreOS and some of the ancillary tooling appears to be out of sync or entirely out of date, and some creative interpretation of guidance from that documentation may be required. Some useful links:
+More documentation on Ignition can be found [here](https://coreos.com/ignition/docs/latest/). 
+
+Please not that as of 11/2019, the documentation between Ignition, CoreOS and some of the ancillary tooling appears to be out of sync or entirely out of date, and some creative interpretation of guidance from that documentation may be required. Some useful links:
 
 * [Ignition Configuration Transpiler](https://coreos.com/os/docs/latest/overview-of-ct.html)
 * [Ignition Configuration Validator](https://coreos.com/validate/)
 
-The [json](ignition/json/) files included this repo contain all the information required to sideload the needed configuration into the CoreOS instance at provision time. The key stanza is the (absurd to humans looking) [storage](https://github.com/dlotterman/inap_demo_platform/blob/16a664aa27a57af684adc9177bfee66d561fe39c/coreos/ignition/json/bmc_ignition.json#L23P) stanza which writes a [simple bash](scripts/) script to `/var/lib/bmc/` which is then constructed into a `systemd` service to be managed by `systemd` in order to populate the isntance with the needed data from the "ConfigDrive". Examples of how to construct that script into the json file can be found in the Ignition configuration [examples](ignition/ct/) included in the repo.
+The [json](ignition/json/) files included this repo contain all the information required to sideload the needed configuration into the CoreOS instance at provision time. The key stanza is the (absurd to humans looking) [storage](https://github.com/dlotterman/inap_demo_platform/blob/16a664aa27a57af684adc9177bfee66d561fe39c/coreos/ignition/json/bmc_ignition.json#L23P) stanza which writes a [simple bash](scripts/) script to `/var/lib/bmc/` which is then constructed into a `bmc_metadata` service to be managed by `systemd` in order to populate the isntance with the needed data from the "ConfigDrive". Examples of how to construct that script into the json file can be found in the Ignition configuration [examples](ignition/ct/) included in the repo.
 
 At this time due to limitations in the Ignition transpiler and YAML tooling, it is strongly recommend to provide the JSON file as the userdata file rather than a Ignition `ct` YAML file, despite that generally not being best practice with other `tool` -> `json` workflows.
 
