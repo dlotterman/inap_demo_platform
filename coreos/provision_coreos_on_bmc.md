@@ -114,7 +114,7 @@ $ openstack flavor list
 +----------------------------------------+----------------------------------------+-------+------+-----------+-------+-----------+
 ```
 
-*Please note:* at this time, this documentation and tooling is likely broken for Bare Metal instances.
+*Please note:* at this time, this documentation and tooling should work for both Virtual and Bare Metal flavors.
 
 
 #### Bootstrapping 
