@@ -2,9 +2,10 @@
 
 set -e
 
-logger "starting bmc_metadata"
+logger "bmc_metadata starting"
 
-CONFIG_DRIVE="/media/configdrive/openstack/latest"
+CONFIG_MOUNT="/media/configdrive"
+CONFIG_DRIVE="$CONFIG_MOUNT/openstack/latest"
 
 mask2cdr ()
 {
@@ -17,33 +18,150 @@ echo "/$(( $2 + (${#x}/4) ))"
 mkdir -p /run/metadata/
 rm /run/metadata/bmc > /dev/null 2>&1 || true
 
-if [ -f "$CONFIG_DRIVE" ]; then
-    logger "could not find mounted configdrive, exiting"
-    exit 1
+if ! mountpoint -q $CONFIG_MOUNT; then
+    logger "bmc_metadata could not find mounted configdrive, attempting to mount"
+	mkdir -p $CONFIG_MOUNT
+    mount -o ro -L config-2 $CONFIG_MOUNT
 fi
 
-for NETWORK in $(jq .networks[].id $CONFIG_DRIVE/network_data.json)
-    do
-        CLEAN_NETWORK=$(echo $NETWORK | sed s/\"//g)
-        UNIT_FILE="/etc/systemd/network/"$CLEAN_NETWORK"_unit.network"
-        LINK=$(jq -r '.networks[] | select(.id == '$NETWORK') | .link' < $CONFIG_DRIVE/network_data.json)
-        IP=$(jq -r '.networks[] | select(.id == '$NETWORK') | .ip_address' < $CONFIG_DRIVE/network_data.json)
-        NETMASK=$(jq -r '.networks[] | select(.id == '$NETWORK') | .netmask' < $CONFIG_DRIVE/network_data.json)
-        CIDR=$(mask2cdr "$NETMASK")
-        GATEWAY=$(jq -r '.networks[] | select(.id == '$NETWORK') | .routes[].gateway' < $CONFIG_DRIVE/network_data.json)
-        DNS0=$(jq -r '.services[0] | select(.type == "dns") | .address' < $CONFIG_DRIVE/network_data.json)
-        DNS1=$(jq -r '.services[1] | select(.type == "dns") | .address' < $CONFIG_DRIVE/network_data.json)
-        echo "[Match]" > "$UNIT_FILE"
-        echo "Name=$LINK" >> "$UNIT_FILE"
-        echo "[Network]" >> "$UNIT_FILE"
-        echo "Address=$IP$CIDR" >> "$UNIT_FILE"
-        if [ ! -z "$GATEWAY" ]; then
-            echo "Gateway=$GATEWAY" >> "$UNIT_FILE"
-            echo "DNS=$DNS0" >> "$UNIT_FILE"
-            echo "DNS=$DNS1" >> "$UNIT_FILE"
-        fi
-        echo "BMC_"$CLEAN_NETWORK"_IP="$IP"" >> /run/metadata/bmc
+if [[ $(systemd-detect-virt) = "kvm" ]]; then
+    logger "bmc_metadata Virtual Cloud Instance Detected"
+
+    for NETWORK in $(jq .networks[].id < $CONFIG_DRIVE/network_data.json)
+        do
+            CLEAN_NETWORK=$(echo $NETWORK | sed s/\"//g)
+            UNIT_FILE="/etc/systemd/network/"$CLEAN_NETWORK"_unit.network"
+            LINK=$(jq -r '.networks[] | select(.id == '$NETWORK') | .link' < $CONFIG_DRIVE/network_data.json)
+            IP=$(jq -r '.networks[] | select(.id == '$NETWORK') | .ip_address' < $CONFIG_DRIVE/network_data.json)
+            NETMASK=$(jq -r '.networks[] | select(.id == '$NETWORK') | .netmask' < $CONFIG_DRIVE/network_data.json)
+            CIDR=$(mask2cdr "$NETMASK")
+            GATEWAY=$(jq -r '.networks[] | select(.id == '$NETWORK') | .routes[].gateway' < $CONFIG_DRIVE/network_data.json)
+            DNS0=$(jq -r '.services[0] | select(.type == "dns") | .address' < $CONFIG_DRIVE/network_data.json)
+            DNS1=$(jq -r '.services[1] | select(.type == "dns") | .address' < $CONFIG_DRIVE/network_data.json)
+            echo "[Match]" > "$UNIT_FILE"
+            echo "Name=$LINK" >> "$UNIT_FILE"
+            echo "[Network]" >> "$UNIT_FILE"
+            echo "Address=$IP$CIDR" >> "$UNIT_FILE"
+            if [ ! -z "$GATEWAY" ]; then
+                echo "Gateway=$GATEWAY" >> "$UNIT_FILE"
+                echo "DNS=$DNS0" >> "$UNIT_FILE"
+                echo "DNS=$DNS1" >> "$UNIT_FILE"
+            fi
+            echo "BMC_"$CLEAN_NETWORK"_IP="$IP"" >> /run/metadata/bmc
+        done
+else
+    logger "bmc_metadata Bare Metal Cloud Instance Detected"
+
+    OS_NICS=$(jq -r '.links[] | select(.type == "ethernet") | .ethernet_mac_address' < $CONFIG_DRIVE/network_data.json)
+	## `lshw` responds back with different values for this screen scrape depending on where in timeline in boot order
+    REAL_NICS=$(lshw -class network 2> /dev/null | grep -A6 "-network " | grep logical | awk '{print$NF}')
+    BONDS=$(jq -r '.links[] | select(.type == "bond") | .id'  < $CONFIG_DRIVE/network_data.json)
+
+	mkdir -p /etc/modprobe.d/
+	echo "options bonding miimon=5" > /etc/modprobe.d/bonding.conf
+	echo "options bonding lacp_rate=1" >> /etc/modprobe.d/bonding.conf
+	echo "options bonding mode=802.3ad" >> /etc/modprobe.d/bonding.conf
+	echo "options xmit_hash_policy=layer3+4" >> /etc/modprobe.d/bonding.conf
+
+    declare -A NICS_TO_BOND
+    
+    for REAL_NIC in $REAL_NICS
+        do
+            for OS_NIC in $OS_NICS
+                do
+                    if [[ $(ethtool -P $REAL_NIC | awk '{print$NF}') == $OS_NIC ]]; then
+                        OS_NIC_NAME=$(jq -r --arg OS_NIC $OS_NIC '.links[] | select((.ethernet_mac_address == $OS_NIC) and .type == "ethernet") | .id' < $CONFIG_DRIVE/network_data.json)
+                        OS_NIC_BOND=$(jq -r --arg OS_NIC_NAME $OS_NIC_NAME '.links[] | select(.type == "bond") | select(.bond_links[] | contains($OS_NIC_NAME)) | .id' < $CONFIG_DRIVE/network_data.json)
+                        NICS_TO_BOND[$REAL_NIC]=$OS_NIC_BOND
+                    
+                        UNIT_FILE="/etc/systemd/network/$REAL_NIC.network"
+                    
+                        echo "[Match]" > "$UNIT_FILE"
+                        echo "Name=$REAL_NIC" >> "$UNIT_FILE"
+                        echo "[Network]" >> "$UNIT_FILE"
+                        echo "Bond=$OS_NIC_BOND" >> "$UNIT_FILE"
+                    fi
+                done
+        done
+                    
+    for BOND in $BONDS
+        do
+            BOND_MODE=$(jq -r --arg BOND $BOND '.links[] | select(.id == $BOND) | .bond_mode'  < $CONFIG_DRIVE/network_data.json)
+            BOND_XMIT_HASH_POL=$(jq -r --arg BOND $BOND '.links[] | select(.id == $BOND) | .bond_xmit_hash_policy'  < $CONFIG_DRIVE/network_data.json)
+            BOND_MIIMON=$(jq -r --arg BOND $BOND '.links[] | select(.id == $BOND) | .bond_miimon'  < $CONFIG_DRIVE/network_data.json)
+            BOND_VLANS=$(jq -r --arg BOND $BOND '.links[] | select(.vlan_link == $BOND) | .id' < $CONFIG_DRIVE/network_data.json)
+            UNIT_FILE="/etc/systemd/network/$BOND.netdev"
+            echo "[NetDev]" > "$UNIT_FILE"
+            echo "Name=$BOND" >> "$UNIT_FILE"
+            echo "Kind=bond" >> "$UNIT_FILE"
+            echo "[Bond]" >> "$UNIT_FILE"
+            echo "Mode=$BOND_MODE" >> "$UNIT_FILE"
+            echo "TransmitHashPolicy=$BOND_XMIT_HASH_POL" >> "$UNIT_FILE"
+            echo "MIIMonitorSec=5" >> "$UNIT_FILE"
+            echo "LACPTransmitRate=fast" >> "$UNIT_FILE"
+        
+            UNIT_FILE="/etc/systemd/network/$BOND.network"
+            echo "[Match]" > "$UNIT_FILE"
+            echo "Name=$BOND" >> "$UNIT_FILE"
+            echo "[Network]" >> "$UNIT_FILE"
+            for BOND_VLAN in $BOND_VLANS
+                do
+                    echo "VLAN=$BOND_VLAN" >> "$UNIT_FILE"
+                done
+            NICS_IN_BOND=""
+            for NIC in "${!NICS_TO_BOND[@]}";
+                do
+                    if [ ${NICS_TO_BOND[$NIC]} == $BOND ]; then
+                        NICS_IN_BOND="${NICS_IN_BOND} $NIC"
+                    fi
+                done
+            NICS_IN_BOND=$(echo $NICS_IN_BOND | sed 's/^ *//g')
+            echo "BindCarrier=$NICS_IN_BOND" >> "$UNIT_FILE"
     done
+
+    for VLAN in $(jq -r '.networks[] | select(.link | contains("vlan")) | .link' < $CONFIG_DRIVE/network_data.json)
+        do
+            VLAN_ID=$(jq -r --arg VLAN $VLAN '.links[] | select(.id == $VLAN) | .vlan_id' < $CONFIG_DRIVE/network_data.json)
+            VLAN_MAC=$(jq -r --arg VLAN $VLAN '.links[] | select(.id == $VLAN) | .ethernet_mac_address' < $CONFIG_DRIVE/network_data.json)
+
+            UNIT_FILE="/etc/systemd/network/$VLAN.netdev"
+            
+            echo "[NetDev]" > "$UNIT_FILE"
+            echo "Name=$VLAN" >> "$UNIT_FILE"
+            echo "Kind=vlan" >> "$UNIT_FILE"
+            echo "MACAddress=$VLAN_MAC" >> "$UNIT_FILE"
+            echo "[VLAN]" >> "$UNIT_FILE"
+            echo "Id=$VLAN_ID" >> "$UNIT_FILE"
+        done
+
+    for NETWORK in $(jq -r '.networks[] | select(.link | contains("vlan")) | .link' < $CONFIG_DRIVE/network_data.json)
+        do
+            IP=$(jq -r --arg NETWORK $NETWORK '.networks[] | select(.link == $NETWORK) | .ip_address' < $CONFIG_DRIVE/network_data.json)
+            NETMASK=$(jq -r --arg NETWORK $NETWORK '.networks[] | select(.link == $NETWORK) | .netmask' < $CONFIG_DRIVE/network_data.json)
+            CIDR=$(mask2cdr "$NETMASK")
+            GATEWAY=$(jq -r --arg NETWORK $NETWORK '.networks[] | select(.link == $NETWORK) | .routes[].gateway' < $CONFIG_DRIVE/network_data.json)
+            DNS0=$(jq -r '.services[0] | select(.type == "dns") | .address' < $CONFIG_DRIVE/network_data.json)
+            DNS1=$(jq -r '.services[1] | select(.type == "dns") | .address' < $CONFIG_DRIVE/network_data.json)
+
+            UNIT_FILE="/etc/systemd/network/$NETWORK.network"
+            
+            echo "[Match]" > "$UNIT_FILE"
+            echo "Name=$NETWORK" >> "$UNIT_FILE"
+            echo "[Address]" >> "$UNIT_FILE"
+            echo "Address=$IP/$CIDR" >> "$UNIT_FILE"
+            if [ ! -z "$GATEWAY" ]; then
+                echo "[Route]" >> "$UNIT_FILE"
+                echo "Destination=0.0.0.0/0" >> "$UNIT_FILE"
+                echo "Gateway=$GATEWAY" >> "$UNIT_FILE"
+                echo "[Network]" >> "$UNIT_FILE"
+                echo "DNS=$DNS0" >> "$UNIT_FILE"
+                echo "DNS=$DNS1" >> "$UNIT_FILE"
+            fi
+            NETWORK_NAME=$(jq -r --arg NETWORK $NETWORK '.networks[] | select(.link | contains($NETWORK)) | .id' < $CONFIG_DRIVE/network_data.json)
+            echo "BMC_"$NETWORK_NAME_IP"=$IP" >> /run/metadata/bmc
+    done
+fi
+               
 
 logger "bmc_metadata systemd-networkd configuration done"
 
@@ -52,6 +170,8 @@ BMC_CORE_PASSWD=$(jq -r .admin_pass < $CONFIG_DRIVE/meta_data.json)
 
 hostnamectl set-hostname "$BMC_INSTANCE_HOSTNAME"
 
+logger "bmc_metadata BMC instance hostname set"
+
 echo -e "$BMC_CORE_PASSWD\n$BMC_CORE_PASSWD" | passwd core > /dev/null 2>&1
 
 jq -r .public_keys[] < $CONFIG_DRIVE/meta_data.json > /home/core/.ssh/authorized_keys
@@ -59,7 +179,7 @@ jq -r .public_keys[] < $CONFIG_DRIVE/meta_data.json > /home/core/.ssh/authorized
 chown core:core /home/core/.ssh/authorized_keys
 chmod 0644 /home/core/.ssh/authorized_keys
 
-systemctl restart systemd-networkd
+logger "bmc_metadata Instance user "core" password set and public ssh key added"
 
+umount $CONFIG_MOUNT > /dev/null 2>&1 || true
 logger "bmc_metadata complete"
-

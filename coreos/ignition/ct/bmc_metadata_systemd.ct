@@ -5,11 +5,11 @@ systemd:
       contents: |
         [Unit]
         Description=Metadata population for INAP BMC
-        Before=network-pre.target
-        Wants=network-pre.target
-        After=local-fs.target
+        Before=systemd-networkd.service
         [Service]
         Type=oneshot 
+		RemainAfterExit=yes
+		TimeoutStartSec=60
         ExecStart=/usr/bin/bash -c "/var/lib/bmc/bmc_coreos.sh"
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=systemd-networkd.service
