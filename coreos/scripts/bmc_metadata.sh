@@ -48,6 +48,7 @@ if [[ $(systemd-detect-virt) = "kvm" ]]; then
                 echo "DNS=$DNS1" >> "$UNIT_FILE"
             fi
             echo "BMC_"$CLEAN_NETWORK"_IP="$IP"" >> /run/metadata/bmc
+            echo "BMC_"$CLEAN_NETWORK"_INTERFACE="$LINK"" >> /run/metadata/bmc
         done
 else
     logger "bmc_metadata Bare Metal Cloud Instance Detected"
@@ -158,7 +159,9 @@ else
                 echo "DNS=$DNS1" >> "$UNIT_FILE"
             fi
             NETWORK_NAME=$(jq -r --arg NETWORK $NETWORK '.networks[] | select(.link | contains($NETWORK)) | .id' < $CONFIG_DRIVE/network_data.json)
-            echo "BMC_"$NETWORK_NAME_IP"=$IP" >> /run/metadata/bmc
+            echo "BMC_"$NETWORK_NAME"_IP=$IP" >> /run/metadata/bmc
+            echo "BMC_"$NETWORK_NAME"_INTERFACE=$NETWORK" >> /run/metadata/bmc
+
     done
 fi
                

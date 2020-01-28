@@ -4,12 +4,27 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Metadata population for INAP BMC
+        Description=metadata population for INAP BMC
         Before=systemd-networkd.service
         [Service]
-        Type=oneshot 
-		RemainAfterExit=yes
-		TimeoutStartSec=60
+        Type=oneshot
+        RemainAfterExit=yes
+        TimeoutStartSec=60
         ExecStart=/usr/bin/bash -c "/var/lib/bmc/bmc_coreos.sh"
         [Install]
         WantedBy=systemd-networkd.service
+    - name: bmc_network_garp.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=BMC GARP
+        After=systemd-networkd-wait-online.service
+        [Service]
+        Type=oneshot
+        EnvironmentFile=/run/metadata/bmc
+        RemainAfterExit=yes
+        TimeoutStartSec=60
+        ExecStartPre=arping -c 5 -I ${BMC_network0_INTERFACE} -U ${BMC_network0_IP}
+        ExecStart=arping -c 5 -I ${BMC_network1_INTERFACE} -U ${BMC_network1_IP}
+        [Install]
+        WantedBy=multi-user.target
