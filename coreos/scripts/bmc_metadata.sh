@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-
+# TODO desperately needs to conform to shellcheck
 set -e
 
 logger "bmc_metadata starting"
